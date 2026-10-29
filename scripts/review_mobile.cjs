@@ -1,0 +1,48 @@
+const { chromium } = require('playwright');
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+fs.mkdirSync('output',{recursive:true});
+(async () => {
+  const base=process.env.EVENTFLOW_BASE_URL||'http://127.0.0.1:8082';
+  const browser=await chromium.launch({channel:'chrome',headless:true});
+  const page=await browser.newPage({viewport:{width:390,height:844},deviceScaleFactor:1});
+  const errors=[];
+  page.on('pageerror',error=>errors.push(error.message));
+  page.on('console',msg=>{if(msg.type()==='error')errors.push(msg.text());});
+  await page.goto(base,{waitUntil:'networkidle'});
+  await page.waitForSelector('.hot-card',{timeout:20000});
+  assert.equal(await page.locator('.hot-card').count(),8,'Home should use the eight catalog events');
+  assert.equal(await page.locator('.bottom-nav').count(),1,'There should be one bottom navigation');
+  assert.equal(await page.locator('.top-search,input[type=search]').count(),0,'Search UI must be absent');
+  const results=[];
+  for(const width of [320,390,768,1440]) {
+    await page.setViewportSize({width,height:width===1440?1000:844});
+    await page.waitForTimeout(180);
+    const dimensions=await page.evaluate(()=>({viewport:innerWidth,body:document.documentElement.scrollWidth,brokenImages:[...document.images].filter(img=>img.complete&&img.naturalWidth===0).map(img=>img.src)}));
+    assert.ok(dimensions.body<=width,'Horizontal page overflow at '+width+': '+dimensions.body);
+    assert.equal(dimensions.brokenImages.length,0,'Images should load');
+    results.push(dimensions);
+    if(width===390||width===1440)await page.screenshot({path:'output/home-'+width+'.png',fullPage:width===1440});
+  }
+  await page.setViewportSize({width:390,height:844});
+  await page.getByRole('button',{name:'#戏剧',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelectorAll('.ticket-feed-item').length===1);
+  assert.equal(await page.locator('.ticket-feed-item').count(),1);
+  await page.getByRole('button',{name:'全部',exact:true}).click();
+  await page.waitForFunction(()=>document.querySelectorAll('.ticket-feed-item').length===8);
+  assert.equal(await page.locator('.ticket-feed-item').count(),8);
+  await page.locator('.hot-card').first().click();
+  await page.waitForSelector('.ticket-panel');
+  assert.equal(await page.locator('.choice-row').first().locator('button').count(),2);
+  assert.ok(await page.getByRole('button',{name:'确认选票'}).isEnabled());
+  const detailWidth=await page.evaluate(()=>document.documentElement.scrollWidth);
+  assert.ok(detailWidth<=390,'Mobile detail should not overflow');
+  await page.screenshot({path:'output/detail-390.png',fullPage:true});
+  await page.getByRole('button',{name:'确认选票'}).click();
+  await page.waitForURL(/login.html\?redirect=/);
+  assert.ok(await page.locator('#phone').isVisible());
+  assert.equal(errors.length,0,'Browser errors: '+errors.join('\n'));
+  fs.writeFileSync('output/mobile-review.json',JSON.stringify({widths:results,browserErrors:errors,categoryFilter:'passed',ticketSelection:'passed',loginReturn:'passed'},null,2));
+  console.log(JSON.stringify({result:'PASS',widths:results.map(r=>r.viewport),errors,preview:base}));
+  await browser.close();
+})().catch(error=>{console.error(error);process.exit(1);});

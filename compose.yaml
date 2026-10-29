@@ -1,0 +1,61 @@
+services:
+  mysql:
+    image: mysql:8.0
+    restart: unless-stopped
+    command: ["--innodb-buffer-pool-size=128M", "--max-connections=40", "--performance-schema=OFF"]
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Set MYSQL_ROOT_PASSWORD in .env}
+      MYSQL_DATABASE: eventflow
+      MYSQL_USER: eventflow
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:?Set MYSQL_PASSWORD in .env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ${MYSQL_INIT_SQL:-./src/main/resources/db/eventflow.sql}:/docker-entrypoint-initdb.d/01-eventflow.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+
+  redis:
+    image: redis:7.2-alpine
+    restart: unless-stopped
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    command: ["sh", "-c", "exec redis-server --appendonly yes --requirepass \"$$REDIS_PASSWORD\""]
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep -q PONG"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: production
+      DB_URL: jdbc:mysql://mysql:3306/eventflow?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      DB_USER: eventflow
+      DB_PASSWORD: ${MYSQL_PASSWORD}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD}
+      EVENTFLOW_UPLOAD_DIR: /app/uploads
+      EVENTFLOW_DEMO_MODE: "true"
+      JAVA_TOOL_OPTIONS: -Xms128m -Xmx384m
+    ports:
+      - "${APP_BIND_IP:-127.0.0.1}:${APP_PORT:-8082}:8082"
+    volumes:
+      - uploads:/app/uploads
+
+volumes:
+  mysql-data:
+  redis-data:
+  uploads:

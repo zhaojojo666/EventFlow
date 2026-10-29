@@ -1,0 +1,982 @@
+openapi: 3.0.3
+info:
+  title: EventFlow 票务与场馆预约 API
+  version: 1.0.0
+  description: |
+    根据当前 Spring Boot 控制器生成，供 Apifox 直接导入。
+
+    登录流程：先调用“发送验证码”，在演示模式下从响应 data.demoCode 取得验证码，再调用“用户登录”。
+    登录响应的 data 是 token。受保护接口使用请求头 `authorization: <token>`，不要添加 Bearer 前缀。
+
+    `/user/logout` 会注销当前 Token。本文档主要覆盖基础接口，新增演出与预订接口见 README。
+servers:
+  - url: http://127.0.0.1:8082
+    description: 本地开发环境
+tags:
+  - name: 用户
+  - name: 场馆
+  - name: 场馆分类
+  - name: 活动动态
+  - name: 好友关注
+  - name: 票种
+  - name: 票务订单
+  - name: 文件上传
+
+paths:
+  /user/code:
+    post:
+      tags: [用户]
+      summary: 发送验证码
+      operationId: sendCode
+      security: []
+      parameters:
+        - name: phone
+          in: query
+          required: true
+          description: 中国大陆手机号；测试初始化数据可使用 13686869696
+          schema:
+            type: string
+            example: "13686869696"
+      responses:
+        "200":
+          description: 演示模式生成验证码、保存到 Redis，并在 data.demoCode 中返回；未接入真实短信
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+              example:
+                success: true
+
+  /user/login:
+    post:
+      tags: [用户]
+      summary: 用户登录
+      description: 响应 data 为 token。后续请求把该值直接放入 authorization 请求头，不加 Bearer。
+      operationId: login
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LoginForm"
+            example:
+              phone: "13686869696"
+              code: "123456"
+      responses:
+        "200":
+          description: 登录结果
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+              examples:
+                success:
+                  summary: 登录成功
+                  value:
+                    success: true
+                    data: 0123456789abcdef0123456789abcdef
+                invalidCode:
+                  summary: 验证码错误
+                  value:
+                    success: false
+                    errorMsg: 验证码错误
+
+  /user/logout:
+    post:
+      tags: [用户]
+      summary: 退出登录（当前未实现）
+      operationId: logout
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /user/me:
+    get:
+      tags: [用户]
+      summary: 获取当前登录用户
+      operationId: getCurrentUser
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          description: 当前用户
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+              example:
+                success: true
+                data:
+                  id: 1
+                  nickName: 小鱼同学
+                  icon: /imgs/activity-posts/activity-post1.jpg
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /user/info/{id}:
+    get:
+      tags: [用户]
+      summary: 查询用户详情
+      operationId: getUserInfo
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: 用户详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /user/{id}:
+    get:
+      tags: [用户]
+      summary: 根据 ID 查询用户
+      operationId: getUserById
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /user/sign:
+    post:
+      tags: [用户]
+      summary: 当日签到
+      operationId: sign
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /user/sign/count:
+    get:
+      tags: [用户]
+      summary: 查询本月连续签到天数
+      operationId: getSignCount
+      security:
+        - TokenAuth: []
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /venue/{id}:
+    get:
+      tags: [场馆]
+      summary: 根据 ID 查询场馆
+      operationId: getVenueById
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          description: 场馆详情
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /venue:
+    post:
+      tags: [场馆]
+      summary: 新增场馆
+      operationId: createVenue
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VenueInput"
+            example:
+              name: Apifox 测试场馆
+              typeId: 1
+              images: /imgs/venue/test.jpg
+              area: 测试商圈
+              address: 测试路 1 号
+              x: 121.4737
+              y: 31.2304
+              avgPrice: 100
+              sold: 0
+              comments: 0
+              score: 45
+              openHours: 10:00-22:00
+      responses:
+        "200":
+          description: data 为新场馆 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+    put:
+      tags: [场馆]
+      summary: 更新场馆
+      operationId: updateVenue
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Venue"
+            example:
+              id: 1
+              name: 更新后的场馆名称
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+
+  /venue/of/type:
+    get:
+      tags: [场馆]
+      summary: 按场馆分类分页查询
+      operationId: getVenuesByType
+      security: []
+      parameters:
+        - name: typeId
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int32
+            example: 1
+        - $ref: "#/components/parameters/CurrentPage"
+        - name: x
+          in: query
+          required: false
+          description: 经度；与 y 同时提供时按 5 公里内距离排序
+          schema:
+            type: number
+            format: double
+            example: 120.149993
+        - name: y
+          in: query
+          required: false
+          description: 纬度；与 x 同时提供时按 5 公里内距离排序
+          schema:
+            type: number
+            format: double
+            example: 30.334229
+      responses:
+        "200":
+          description: 场馆列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /venue/of/name:
+    get:
+      tags: [场馆]
+      summary: 按名称分页查询场馆
+      operationId: getVenuesByName
+      security: []
+      parameters:
+        - name: name
+          in: query
+          required: false
+          schema:
+            type: string
+            example: 美食
+        - $ref: "#/components/parameters/CurrentPage"
+      responses:
+        "200":
+          description: 场馆列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /venue-category/list:
+    get:
+      tags: [场馆分类]
+      summary: 查询场馆分类列表
+      operationId: listVenueCategorys
+      security: []
+      responses:
+        "200":
+          description: 场馆分类列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /activity-post:
+    post:
+      tags: [活动动态]
+      summary: 发布活动动态
+      description: userId 由后端根据登录用户自动设置。
+      operationId: createActivityPost
+      security:
+        - TokenAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActivityPostInput"
+            example:
+              venueId: 1
+              title: Apifox 测试活动动态
+              images: /activity-posts/1/1/test.jpg
+              content: 这是一条接口测试笔记
+      responses:
+        "200":
+          description: data 为新笔记 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /activity-post/like/{id}:
+    put:
+      tags: [活动动态]
+      summary: 点赞活动动态
+      operationId: likeActivityPost
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /activity-post/of/me:
+    get:
+      tags: [活动动态]
+      summary: 查询我的活动动态
+      operationId: getMyActivityPosts
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/CurrentPage"
+      responses:
+        "200":
+          description: 当前用户的笔记列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /activity-post/hot:
+    get:
+      tags: [活动动态]
+      summary: 查询热门活动动态
+      operationId: getHotActivityPosts
+      security: []
+      parameters:
+        - $ref: "#/components/parameters/CurrentPage"
+      responses:
+        "200":
+          description: 热门笔记列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /activity-post/{id}:
+    get:
+      tags: [活动动态]
+      summary: 查询活动动态详情
+      operationId: getActivityPostById
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /activity-post/likes/{id}:
+    get:
+      tags: [活动动态]
+      summary: 查询最早点赞的前五名用户
+      operationId: getActivityPostLikes
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /activity-post/of/user:
+    get:
+      tags: [活动动态]
+      summary: 查询指定用户的活动动态
+      operationId: getActivityPostsByUser
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: id
+          in: query
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+        - $ref: "#/components/parameters/CurrentPage"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /activity-post/of/follow:
+    get:
+      tags: [活动动态]
+      summary: 滚动分页查询关注 Feed
+      operationId: getFollowFeed
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: lastId
+          in: query
+          required: true
+          description: 首次传当前时间戳，之后传上次响应的 minTime
+          schema:
+            type: integer
+            format: int64
+        - name: offset
+          in: query
+          required: false
+          schema:
+            type: integer
+            default: 0
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /follow/{id}/{isFollow}:
+    put:
+      tags: [好友关注]
+      summary: 关注或取消关注用户
+      operationId: updateFollow
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+        - name: isFollow
+          in: path
+          required: true
+          description: true 关注，false 取消关注
+          schema:
+            type: boolean
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /follow/or/not/{id}:
+    get:
+      tags: [好友关注]
+      summary: 判断是否已关注
+      operationId: isFollowing
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /follow/common/{id}:
+    get:
+      tags: [好友关注]
+      summary: 查询共同关注
+      operationId: getCommonFollows
+      security:
+        - TokenAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdPath"
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /ticket:
+    post:
+      tags: [票种]
+      summary: 新增普通票种
+      operationId: createTicket
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketInput"
+            example:
+              venueId: 1
+              title: EventFlow 普通票
+              subTitle: 周一至周五可用
+              rules: 全场通用
+              payValue: 8000
+              actualValue: 10000
+              type: 0
+              status: 1
+      responses:
+        "200":
+          description: data 为票种 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /ticket/seckill:
+    post:
+      tags: [票种]
+      summary: 新增秒杀票种
+      operationId: createLimitedTicket
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/LimitedTicketInput"
+            example:
+              venueId: 1
+              title: EventFlow 限量早鸟票
+              subTitle: 数量有限
+              rules: 每人限购一张
+              payValue: 1000
+              actualValue: 5000
+              type: 1
+              status: 1
+              stock: 100
+              beginTime: "2026-08-05T10:00:00"
+              endTime: "2026-08-06T22:00:00"
+      responses:
+        "200":
+          description: data 为票种 ID
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /ticket/list/{venueId}:
+    get:
+      tags: [票种]
+      summary: 查询指定场馆的票种
+      operationId: listVenueTickets
+      security: []
+      parameters:
+        - name: venueId
+          in: path
+          required: true
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        "200":
+          description: 票种列表
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /ticket-order/seckill/{id}:
+    post:
+      tags: [票务订单]
+      summary: 秒杀票种下单
+      operationId: limitedTicket
+      security:
+        - TokenAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: 票种 ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+
+  /upload/activity-post:
+    post:
+      tags: [文件上传]
+      summary: 上传活动图片
+      operationId: uploadActivityPostImage
+      security: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required: [file]
+              properties:
+                file:
+                  type: string
+                  format: binary
+      responses:
+        "200":
+          description: data 为服务器生成的图片相对路径
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Result"
+
+  /upload/activity-post/delete:
+    get:
+      tags: [文件上传]
+      summary: 删除活动图片
+      operationId: deleteActivityPostImage
+      security: []
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: 上传接口返回的图片相对路径
+          schema:
+            type: string
+            example: /activity-posts/1/2/example.jpg
+      responses:
+        "200":
+          $ref: "#/components/responses/ResultResponse"
+
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: header
+      name: authorization
+      description: 登录接口响应 data 中的 token，直接填写，不加 Bearer 前缀
+
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: integer
+        format: int64
+        example: 1
+    CurrentPage:
+      name: current
+      in: query
+      required: false
+      description: 页码，默认 1
+      schema:
+        type: integer
+        format: int32
+        default: 1
+        minimum: 1
+
+  responses:
+    ResultResponse:
+      description: 统一业务响应
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/Result"
+    Unauthorized:
+      description: 未登录或 token 已失效；该响应通常没有 JSON 响应体
+
+  schemas:
+    Result:
+      type: object
+      description: 项目统一响应。Jackson 会忽略值为 null 的字段。
+      required: [success]
+      properties:
+        success:
+          type: boolean
+          description: 业务是否成功
+        errorMsg:
+          type: string
+          nullable: true
+          description: 失败原因
+        data:
+          nullable: true
+          description: 响应数据，类型随接口变化
+        total:
+          type: integer
+          format: int64
+          nullable: true
+          description: 分页总数
+
+    LoginForm:
+      type: object
+      required: [phone, code]
+      properties:
+        phone:
+          type: string
+          pattern: "^1[3-9]\\d{9}$"
+          example: "13686869696"
+        code:
+          type: string
+          description: 发送验证码接口生成的六位数字
+          pattern: "^\\d{6}$"
+          example: "123456"
+        password:
+          type: string
+          nullable: true
+          description: DTO 中存在该字段，但当前登录实现未使用密码
+
+    UserDTO:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        nickName:
+          type: string
+        icon:
+          type: string
+
+    UserInfo:
+      type: object
+      properties:
+        userId:
+          type: integer
+          format: int64
+        city:
+          type: string
+        introduce:
+          type: string
+          maxLength: 128
+        fans:
+          type: integer
+          format: int32
+        followee:
+          type: integer
+          format: int32
+        gender:
+          type: boolean
+          description: 实体定义为 Boolean；数据库含义为 0 男、1 女
+        birthday:
+          type: string
+          format: date
+        credits:
+          type: integer
+          format: int32
+        level:
+          type: boolean
+          description: 当前实体定义为 Boolean
+
+    VenueInput:
+      type: object
+      required: [name, typeId]
+      properties:
+        name:
+          type: string
+        typeId:
+          type: integer
+          format: int64
+        images:
+          type: string
+          description: 多张图片用英文逗号分隔
+        area:
+          type: string
+        address:
+          type: string
+        x:
+          type: number
+          format: double
+          description: 经度
+        y:
+          type: number
+          format: double
+          description: 纬度
+        avgPrice:
+          type: integer
+          format: int64
+        sold:
+          type: integer
+          format: int32
+        comments:
+          type: integer
+          format: int32
+        score:
+          type: integer
+          format: int32
+          description: 评分乘 10 后保存，例如 45 表示 4.5 分
+        openHours:
+          type: string
+
+    Venue:
+      allOf:
+        - $ref: "#/components/schemas/VenueInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            createTime:
+              type: string
+              format: date-time
+            updateTime:
+              type: string
+              format: date-time
+            distance:
+              type: number
+              format: double
+
+    VenueCategory:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
+        icon:
+          type: string
+        sort:
+          type: integer
+          format: int32
+
+    ActivityPostInput:
+      type: object
+      required: [venueId, title, content]
+      properties:
+        venueId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        images:
+          type: string
+          description: 最多 9 张，多张图片用英文逗号分隔
+        content:
+          type: string
+
+    ActivityPost:
+      allOf:
+        - $ref: "#/components/schemas/ActivityPostInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            userId:
+              type: integer
+              format: int64
+            icon:
+              type: string
+            name:
+              type: string
+            isLike:
+              type: boolean
+            liked:
+              type: integer
+              format: int32
+            comments:
+              type: integer
+              format: int32
+            createTime:
+              type: string
+              format: date-time
+            updateTime:
+              type: string
+              format: date-time
+
+    TicketInput:
+      type: object
+      required: [venueId, title, payValue, actualValue, type]
+      properties:
+        venueId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        subTitle:
+          type: string
+        rules:
+          type: string
+        payValue:
+          type: integer
+          format: int64
+          description: 支付金额，单位分
+        actualValue:
+          type: integer
+          format: int64
+          description: 抵扣金额，单位分
+        type:
+          type: integer
+          format: int32
+        status:
+          type: integer
+          format: int32
+
+    LimitedTicketInput:
+      allOf:
+        - $ref: "#/components/schemas/TicketInput"
+        - type: object
+          required: [stock, beginTime, endTime]
+          properties:
+            stock:
+              type: integer
+              format: int32
+            beginTime:
+              type: string
+              format: date-time
+              description: Spring LocalDateTime 格式，例如 2026-08-05T10:00:00
+            endTime:
+              type: string
+              format: date-time
+
+    Ticket:
+      allOf:
+        - $ref: "#/components/schemas/TicketInput"
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            stock:
+              type: integer
+              format: int32
+            beginTime:
+              type: string
+              format: date-time
+            endTime:
+              type: string
+              format: date-time
+            createTime:
+              type: string
+              format: date-time
+            updateTime:
+              type: string
+              format: date-time

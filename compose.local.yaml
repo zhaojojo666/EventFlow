@@ -1,0 +1,18 @@
+# Local demo dependencies. These ports do not replace your MySQL on 3306.
+services:
+  mysql:
+    image: mysql:8.0
+    command: ["--innodb-buffer-pool-size=128M", "--performance-schema=OFF"]
+    environment:
+      MYSQL_ROOT_PASSWORD: eventflow-qa-local
+      MYSQL_DATABASE: eventflow_desktop
+    ports: ["127.0.0.1:23306:3306"]
+    volumes:
+      - qa-mysql:/var/lib/mysql
+      - ./src/main/resources/db/eventflow.sql:/docker-entrypoint-initdb.d/01-eventflow.sql:ro
+  redis:
+    image: redis:7.2-alpine
+    command: ["redis-server", "--requirepass", "eventflow-qa-local"]
+    ports: ["127.0.0.1:26379:6379"]
+volumes:
+  qa-mysql:

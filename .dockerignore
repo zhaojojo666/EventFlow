@@ -1,0 +1,16 @@
+.idea
+.git
+.run
+.tools
+output
+migration
+design
+scripts
+src
+EventFlow-deploy.tar.gz
+.env
+target/*
+!target/eventflow-ticketing-0.0.1-SNAPSHOT.jar
+uploads
+jmeter
+*.md

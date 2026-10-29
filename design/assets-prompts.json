@@ -1,0 +1,70 @@
+{
+  "generator": "built-in image_gen",
+  "assets": [
+    {
+      "key": "hero",
+      "prompt": "Use case: ads-marketing. Asset type: wide desktop ticketing website hero photograph, 1536x1024 landscape. Primary request: an atmospheric fictional outdoor music festival at blue hour, seen from behind the crowd towards a monumental warm orange circular stage arch. Celebratory but sophisticated, distant silhouettes, tiny warm lights, deep indigo sky, peach sunset on horizon, authentic cinematic live photography with subtle grain. Composition: stage in the right half, upper and left half dark uncluttered negative space for HTML headline overlay; wide cinematic composition, no close-up faces. Color palette: midnight navy, tangerine, subtle magenta. Constraints: absolutely no typography, words, logos, watermarks, UI elements, borders, food, collage or contact sheet. A single complete polished editorial image.",
+      "output": "src/main/resources/static/imgs/eventflow/hero.webp"
+    },
+    {
+      "key": "night-current",
+      "prompt": "Use case: ads-marketing. Asset type: portrait cover art for a fictional electronic music festival titled Night Current, text will be added by HTML. Primary request: a sculptural translucent orange-red torus hovering above a dark deep-blue sea, concentric reflected ripples, dramatic ethereal blue-hour lighting, sophisticated contemporary music festival art direction, subtle printed texture, minimal high-end poster composition. Portrait 1024x1536. Large central sculptural object, generous dark space above and below. Orange, electric blue and black. Constraints: no text, letters, logos, watermark, borders, food or collage. One standalone artwork.",
+      "output": "src/main/resources/static/imgs/eventflow/night-current.webp"
+    },
+    {
+      "key": "between-stars",
+      "prompt": "Use case: ads-marketing. Asset type: portrait cover art for a fictional contemporary theater production. Primary request: a lone distant human silhouette standing in a vast terracotta red theater space, a giant cream-colored crescent disc suspended above, long theatrical spotlight and poetic shadow, surreal physical stage set, atmospheric fine-art photography. Portrait 1024x1536 composition, muted red, pale cream, deep burgundy, sophisticated editorial performing arts poster with subtle paper grain. Constraints: no text, lettering, logos, watermark, food, frames, collage. Single complete artwork with space for HTML title.",
+      "output": "src/main/resources/static/imgs/eventflow/between-stars.webp"
+    },
+    {
+      "key": "light-field",
+      "prompt": "Use case: ads-marketing. Asset type: portrait exhibition artwork for a fictional contemporary light and space art exhibition. Primary request: an immersive museum installation with a giant luminous lime-green sphere and slender chrome arcs in a matte white architectural gallery, tiny anonymous visitors for scale, precise modern exhibition photography, soft natural shadows, collectible design magazine aesthetic. Portrait 1024x1536, lime green, pale silver and ivory. Constraints: no text, signage, logos, watermark, food, borders or collage. One complete image with uncluttered composition.",
+      "output": "src/main/resources/static/imgs/eventflow/light-field.webp"
+    },
+    {
+      "key": "city-jazz",
+      "prompt": "Use case: ads-marketing. Asset type: portrait cover artwork for a fictional event on a desktop ticketing platform. Primary request: a polished brass saxophone leaning against a cobalt-blue velvet curtain, warm amber spotlight, moody small jazz club atmosphere, cinematic still-life photography. Portrait 1024x1536, polished cohesive editorial art direction, subtle fine grain, palette cobalt, mustard gold, black. Single visually memorable central composition with space for HTML title overlay. Constraints: no text, lettering, logos, watermarks, borders, food, restaurant imagery, collage or contact sheet. One standalone finished image.",
+      "output": "src/main/resources/static/imgs/eventflow/city-jazz.webp"
+    },
+    {
+      "key": "court-side",
+      "prompt": "Use case: ads-marketing. Asset type: portrait cover artwork for a fictional event on a desktop ticketing platform. Primary request: a solitary basketball suspended above a vivid coral outdoor basketball court with curved white court lines and extremely long crisp afternoon shadows, aerial graphic sports photography, energetic editorial composition. Portrait 1024x1536, polished cohesive editorial art direction, subtle fine grain, palette coral orange, ivory, blue. Single visually memorable central composition with space for HTML title overlay. Constraints: no text, lettering, logos, watermarks, borders, food, restaurant imagery, collage or contact sheet. One standalone finished image.",
+      "output": "src/main/resources/static/imgs/eventflow/court-side.webp"
+    },
+    {
+      "key": "forest-letter",
+      "prompt": "Use case: ads-marketing. Asset type: portrait cover artwork for a fictional event on a desktop ticketing platform. Primary request: a tiny whimsical theater puppet fox made from orange felt standing in a magical oversized paper-cut woodland, layered emerald foliage, a warm glowing circular moon, rich tactile handcrafted stage set, high-end family theater campaign. Portrait 1024x1536, polished cohesive editorial art direction, subtle fine grain, palette forest green, warm ochre, pale mint. Single visually memorable central composition with space for HTML title overlay. Constraints: no text, lettering, logos, watermarks, borders, food, restaurant imagery, collage or contact sheet. One standalone finished image.",
+      "output": "src/main/resources/static/imgs/eventflow/forest-letter.webp"
+    },
+    {
+      "key": "blue-hours",
+      "prompt": "Use case: ads-marketing. Asset type: portrait cover artwork for a fictional event on a desktop ticketing platform. Primary request: a contemporary ballet dancer in a flowing pale-blue dress captured midleap in a vast ultramarine architectural space, sheer fabric tracing an elegant arc, poetic high contrast theatrical photography, distant full figure with generous negative space. Portrait 1024x1536, polished cohesive editorial art direction, subtle fine grain, palette ultramarine, powder blue, ivory. Single visually memorable central composition with space for HTML title overlay. Constraints: no text, lettering, logos, watermarks, borders, food, restaurant imagery, collage or contact sheet. One standalone finished image.",
+      "output": "src/main/resources/static/imgs/eventflow/blue-hours.webp"
+    },
+    {
+      "key": "laugh-club",
+      "prompt": "Use case: ads-marketing. Asset type: portrait cover artwork for a fictional event on a desktop ticketing platform. Primary request: a single vintage chrome stand microphone casting a long playful curved shadow onto an apricot studio stage, sculptural yellow semicircle backdrop and deep red velvet curtain edge, sophisticated playful comedy festival poster photography. Portrait 1024x1536, polished cohesive editorial art direction, subtle fine grain, palette apricot, warm yellow, scarlet. Single visually memorable central composition with space for HTML title overlay. Constraints: no text, lettering, logos, watermarks, borders, food, restaurant imagery, collage or contact sheet. One standalone finished image.",
+      "output": "src/main/resources/static/imgs/eventflow/laugh-club.webp"
+    },
+    {
+      "key": "venue-stage",
+      "prompt": "Use case: photorealistic-natural. Asset type: landscape venue photography for fictional ticketing website. Primary request: a contemporary open-air concert stage beside a river at dusk, a sweeping orange semicircular light arch and elegant steel stage structure, empty audience grounds ready for a festival, trees and city lights far away, welcoming premium cultural destination. Landscape 1536x1024, natural material textures, credible architectural detail, professional editorial quality. Constraints: no readable signs, text, logos, watermarks, food, restaurants, borders or collage. One complete standalone image.",
+      "output": "src/main/resources/static/imgs/eventflow/venue-stage.webp"
+    },
+    {
+      "key": "venue-theater",
+      "prompt": "Use case: photorealistic-natural. Asset type: landscape venue photography for fictional ticketing website. Primary request: a beautiful contemporary performing arts theater auditorium with warm walnut acoustic panels, curved balconies and terracotta red upholstered seats, view towards an empty softly lit stage, refined architectural photography. Landscape 1536x1024, natural material textures, credible architectural detail, professional editorial quality. Constraints: no readable signs, text, logos, watermarks, food, restaurants, borders or collage. One complete standalone image.",
+      "output": "src/main/resources/static/imgs/eventflow/venue-theater.webp"
+    },
+    {
+      "key": "venue-gallery",
+      "prompt": "Use case: photorealistic-natural. Asset type: landscape venue photography for fictional ticketing website. Primary request: a serene contemporary art museum atrium with sculptural white walls and skylights, a large chrome ring art installation, natural daylight, warm ivory concrete floors and a few small anonymous visitors, refined architectural photography. Landscape 1536x1024, natural material textures, credible architectural detail, professional editorial quality. Constraints: no readable signs, text, logos, watermarks, food, restaurants, borders or collage. One complete standalone image.",
+      "output": "src/main/resources/static/imgs/eventflow/venue-gallery.webp"
+    },
+    {
+      "key": "venue-arena",
+      "prompt": "Use case: photorealistic-natural. Asset type: landscape venue photography for fictional ticketing website. Primary request: a contemporary indoor sports arena with pristine hardwood basketball floor, blue spectator seats and dramatic overhead lighting, empty before an event, precise premium architectural photography. Landscape 1536x1024, natural material textures, credible architectural detail, professional editorial quality. Constraints: no readable signs, text, logos, watermarks, food, restaurants, borders or collage. One complete standalone image.",
+      "output": "src/main/resources/static/imgs/eventflow/venue-arena.webp"
+    }
+  ]
+}

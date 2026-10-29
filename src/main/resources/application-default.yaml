@@ -1,0 +1,13 @@
+# Default local Docker dependencies from compose.local.yaml.
+# Explicit environment variables still take precedence over these demo defaults.
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:mysql://127.0.0.1:23306/eventflow_desktop?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true}
+    username: ${DB_USER:root}
+    password: ${DB_PASSWORD:eventflow-qa-local}
+  redis:
+    host: ${REDIS_HOST:127.0.0.1}
+    port: ${REDIS_PORT:26379}
+    password: ${REDIS_PASSWORD:eventflow-qa-local}
+eventflow:
+  demo-mode: ${EVENTFLOW_DEMO_MODE:true}
